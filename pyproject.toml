@@ -1,0 +1,22 @@
+[project]
+name = "packaging-lead-intake"
+version = "0.1.0"
+description = "Google ADK prototype for packaging MSME lead intake and qualification."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "google-adk>=1.31.0",
+    "google-genai>=1.0.0",
+    "python-dotenv>=1.2.2",
+    "uvicorn>=0.30.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

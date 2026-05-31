@@ -1,0 +1,17 @@
+{
+  "note": "Documentation-only example. This is not wired into the demo.",
+  "business": {
+    "name": "MetroFab Works",
+    "industry": "industrial fabrication MSME",
+    "location": "Peenya, Bengaluru",
+    "description": "A small fabrication shop handling custom brackets, frames, and sheet metal jobs."
+  },
+  "would_change": [
+    "product_categories",
+    "required_fields",
+    "lead scoring thresholds",
+    "handoff triggers",
+    "safe response rules",
+    "suggested human scripts"
+  ]
+}

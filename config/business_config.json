@@ -1,0 +1,109 @@
+{
+  "business": {
+    "name": "BLRPackworks",
+    "industry": "custom packaging manufacturing MSME",
+    "location": "Peenya, Bengaluru",
+    "description": "BLRPackworks is a Peenya-based custom corrugated and printed packaging manufacturer serving D2C brands, e-commerce sellers, food brands, and industrial customers."
+  },
+  "lead_sources": ["IndiaMART", "Justdial", "WhatsApp", "Website", "Phone Transcript"],
+  "capabilities": [
+    "corrugated shipping boxes",
+    "custom printed cartons",
+    "food-grade packaging inquiries",
+    "e-commerce packaging",
+    "industrial packaging"
+  ],
+  "product_categories": {
+    "corrugated_box": {
+      "display_name": "corrugated box",
+      "required_fields": [
+        ["dimensions", "length x width x height"],
+        ["quantity", "quantity"],
+        ["ply", "ply"],
+        ["material_strength", "BF/GSM or material strength"],
+        ["product_weight", "product weight"],
+        ["location", "delivery location"]
+      ]
+    },
+    "printed_carton": {
+      "display_name": "printed carton",
+      "required_fields": [
+        ["dimensions", "dimensions"],
+        ["quantity", "quantity"],
+        ["paperboard_gsm", "paperboard/GSM"],
+        ["print_colors", "number of print colors"],
+        ["finish_lamination", "finish/lamination"],
+        ["artwork_ready", "artwork readiness"],
+        ["location", "delivery location"]
+      ]
+    },
+    "food_packaging": {
+      "display_name": "food packaging",
+      "required_fields": [
+        ["dimensions", "dimensions"],
+        ["quantity", "quantity"],
+        ["food_grade_requirement", "food-grade requirement"],
+        ["barrier_requirement", "moisture/oil barrier requirement"],
+        ["location", "delivery location"]
+      ]
+    },
+    "ecommerce_shipping": {
+      "display_name": "e-commerce shipping box",
+      "required_fields": [
+        ["product_weight", "product weight"],
+        ["fragility", "fragility"],
+        ["shipment_volume", "approximate shipment volume"],
+        ["branding_printing_need", "branding/printing need"],
+        ["dimensions", "box dimensions"],
+        ["location", "delivery location"]
+      ]
+    },
+    "industrial_packaging": {
+      "display_name": "industrial packaging",
+      "required_fields": [
+        ["industrial_product_type", "product type"],
+        ["product_weight", "product weight"],
+        ["dimensions", "dimensions"],
+        ["handling_storage_requirement", "handling/storage requirement"],
+        ["quantity", "quantity"],
+        ["location", "delivery location"]
+      ]
+    }
+  },
+  "qualification_rules": {
+    "bulk_quantity_threshold": 1000,
+    "warm_missing_field_limit": 4,
+    "follow_up_question_limit": 4
+  },
+  "handoff_triggers": [
+    "price_request",
+    "urgent_timeline",
+    "hot_lead",
+    "delivery_commitment",
+    "low_confidence",
+    "unsupported_request",
+    "complete_quote_ready"
+  ],
+  "safety_constraints": [
+    "Do not invent prices.",
+    "Do not promise delivery dates.",
+    "Do not claim inventory availability.",
+    "Do not offer discounts.",
+    "Do not finalize quotations.",
+    "Do not pretend a human approved anything.",
+    "Do not send anything externally."
+  ],
+  "source_behavior": {
+    "WhatsApp": "WhatsApp lead may be conversational or incomplete; keep follow-up short.",
+    "IndiaMART": "IndiaMART lead may be partial; qualify before sales spends time.",
+    "Justdial": "Justdial lead may be partial; qualify before sales spends time.",
+    "Phone Transcript": "Phone transcript should be summarized cleanly before sales follow-up.",
+    "Website": "Website form may already contain structured fields; verify missing quote details."
+  },
+  "response_templates": {
+    "price_request": "Pricing depends on exact dimensions, material strength/GSM, printing or finishing needs, quantity, and delivery location. I can collect these details and pass them to the sales team for an accurate quotation.",
+    "commitment_request": "I cannot confirm delivery, stock, discounts, or final pricing without sales review. I can collect the key details and pass them to the team.",
+    "unsupported_request": "This may be outside our usual packaging scope. I can capture the details and pass them to the sales team to confirm whether we can help."
+  },
+  "suggested_human_script": "Hi, this is from {business_name}. I saw your requirement for {customer_need}. To prepare an accurate quote, could you confirm {missing_fields}?"
+}
