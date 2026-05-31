@@ -1,6 +1,6 @@
 # BLRPackworks Lead Intake Assistant
 
-This is a small Google ADK prototype for an AI Engineer hiring evaluation. It
+This is a small Google ADK prototype. It
 models BLRPackworks, a Peenya-based custom corrugated and printed packaging
 manufacturer serving D2C brands, e-commerce sellers, food brands, and
 industrial customers.

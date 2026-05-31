@@ -20,7 +20,7 @@ customers.
 
 ## 3. Why BLRPackworks
 
-This segment is a good evaluation case because leads are messy, specs matter,
+This segment is a good test case because leads are messy, specs matter,
 pricing is unsafe without exact details, and sales follow-up speed matters. It
 also has realistic lead sources: IndiaMART, Justdial, WhatsApp, website, and
 phone calls.
@@ -51,7 +51,7 @@ Human Handoff Summary
 Local Lead Log
 ```
 
-The UI streams these stages over WebSocket so the evaluator can see the process
+The UI streams these stages over WebSocket so the user can see the process
 step by step.
 
 ## 6. What AI Handles
