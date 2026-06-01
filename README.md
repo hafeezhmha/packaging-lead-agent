@@ -250,19 +250,22 @@ Voice flow:
 - Optional browser TTS can read the assistant reply aloud when the `Read
   assistant reply aloud` checkbox is enabled.
 
-For local demo purposes, `ui.py` uses lightweight extraction heuristics so it can
-run without an LLM or credentials. In the ADK path, `agent.py` uses the LLM for
-messy language understanding and field extraction, then calls the same
-deterministic tool.
+For local demo purposes, `ui.py` attempts Gemini text extraction when
+`GOOGLE_API_KEY` is configured. If Gemini is unavailable, it falls back to
+lightweight extraction heuristics so the demo can still run without credentials.
+In both paths, deterministic code handles scoring, missing fields, safety, and
+handoff.
 
 Current AI/STT/TTS status:
 
-- WebSocket UI extraction: stable demo heuristics in
-  `packaging_lead_intake/pipeline.py`.
+- WebSocket UI extraction: Gemini text extraction when `GOOGLE_API_KEY` is
+  configured, with stable demo heuristics in `packaging_lead_intake/pipeline.py`
+  as fallback.
 - ADK/Gemini extraction: supported separately through `packaging_lead_intake/agent.py`
   when API credentials are configured.
-- WebSocket UI and ADK/Gemini extraction are currently separate paths, but both
-  use the same deterministic qualification tool after extraction.
+- WebSocket UI and ADK agent are separate entry points, but both use Gemini for
+  messy language understanding when configured and both use the same
+  deterministic qualification tool after extraction.
 - Voice STT: browser microphone capture is sent to the backend; backend tries
   Gemini audio transcription with `GOOGLE_API_KEY`; browser Web Speech
   API/manual transcript edit is the fallback.
@@ -346,13 +349,12 @@ unnecessary CRM, cart, live video, and multimodal complexity.
 - No pricing engine.
 - No delivery feasibility or inventory lookup.
 - No CRM or database beyond the local JSONL lead log.
-- The deterministic demo uses pre-extracted fields; the ADK agent uses the LLM
-  to extract those fields from conversation.
+- The local WebSocket UI uses Gemini text extraction when configured and falls
+  back to heuristics if the API is unavailable.
 - The local UI is a demo surface, not a SaaS dashboard or CRM.
 - Voice capture is real browser microphone capture. The backend can use Gemini
   audio transcription with `GOOGLE_API_KEY`; browser speech recognition/manual
   transcript edit remains the fallback.
 - TTS is browser Web Speech Synthesis only, not production TTS.
 - This is still demo voice flow, not production call-center infrastructure.
-- The local UI does not use the live LLM extraction path unless you run the ADK
-  agent separately.
+- The ADK agent remains a separate entry point for an agent-console demo.

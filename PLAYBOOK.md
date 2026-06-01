@@ -62,9 +62,10 @@ step by step.
 - Phone transcript summarization.
 - Natural customer-facing replies.
 
-In the local UI, extraction uses stable demo heuristics so the demo runs without
-credentials. In the ADK path, the LLM performs this extraction and calls the
-same deterministic qualification tool.
+In the local UI, extraction uses Gemini when `GOOGLE_API_KEY` is configured. If
+Gemini is unavailable, it falls back to stable demo heuristics so the demo still
+runs. In both paths, the extracted fields go through the same deterministic
+qualification tool.
 
 ## 7. What Deterministic Code Handles
 
@@ -171,12 +172,14 @@ TTS provider in this prototype.
 
 Current AI/STT/TTS status:
 
-- WebSocket UI extraction uses stable demo heuristics in
-  `packaging_lead_intake/pipeline.py`.
+- WebSocket UI extraction uses Gemini text extraction when `GOOGLE_API_KEY` is
+  configured, with stable demo heuristics in `packaging_lead_intake/pipeline.py`
+  as fallback.
 - ADK/Gemini extraction is available separately through
   `packaging_lead_intake/agent.py` with Gemini API key or Vertex AI credentials.
-- The WebSocket UI and ADK/Gemini extraction path are currently separate, but
-  both share the deterministic qualification logic after extraction.
+- The WebSocket UI and ADK agent are separate entry points, but both use Gemini
+  for messy language understanding when configured and share deterministic
+  qualification logic after extraction.
 - Voice input is browser microphone capture sent to the backend. Backend
   attempts Gemini audio transcription with `GOOGLE_API_KEY`; browser Web Speech
   API/manual transcript edit remains the fallback.

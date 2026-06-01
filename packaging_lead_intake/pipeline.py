@@ -8,17 +8,24 @@ without credentials.
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from pathlib import Path
 from typing import Any, Iterable
+import urllib.error
+import urllib.request
+
+from dotenv import load_dotenv
 
 from .stt import transcribe_audio_with_gemini
 from .tools import qualify_packaging_lead
 
 
 LOG_PATH = "lead_log.jsonl"
+GEMINI_TEXT_MODEL = os.environ.get("GEMINI_TEXT_MODEL", "gemini-2.5-flash")
 SOURCES = ["IndiaMART", "Justdial", "WhatsApp", "Website", "Phone Transcript"]
+EXTRACTION_METADATA_KEYS = {"extraction_mode", "extraction_error"}
 
 EXAMPLES = {
     "Hot IndiaMART lead": {
@@ -37,12 +44,43 @@ EXAMPLES = {
         "source": "Phone Transcript",
         "message": "I run a small food brand in Indiranagar and need oil-resistant food packaging for 2000 units next month. Can you confirm price today?",
     },
+    "Messy printed carton": {
+        "source": "WhatsApp",
+        "message": "Bro need approx 2k mono cartons for skin care, 10x6x4 cm, 4 colour print, matte lamination, artwork ready. Bommanahalli side. Can you quote fast?",
+    },
+    "Messy food-packaging call": {
+        "source": "Phone Transcript",
+        "message": "Caller runs a small cafe cloud kitchen. Needs grease proof food boxes, around fifteen hundred pieces, oil barrier and food safe material, delivery Whitefield this week. Asked if price can be confirmed today.",
+    },
 }
 
 
 def first_number(text: str) -> int:
-    match = re.search(r"\b(\d{2,7})\b", text.replace(",", ""))
-    return int(match.group(1)) if match else 0
+    normalized = text.replace(",", "").lower()
+    compact_match = re.search(r"\b(\d+(?:\.\d+)?)\s*k\b", normalized)
+    if compact_match:
+        return int(float(compact_match.group(1)) * 1000)
+    lakh_match = re.search(r"\b(\d+(?:\.\d+)?)\s*lakh\b", normalized)
+    if lakh_match:
+        return int(float(lakh_match.group(1)) * 100000)
+    match = re.search(r"\b(\d{2,7})\b", normalized)
+    if match:
+        return int(match.group(1))
+
+    number_words = {
+        "five thousand": 5000,
+        "three thousand": 3000,
+        "two thousand": 2000,
+        "fifteen hundred": 1500,
+        "twelve hundred": 1200,
+        "one thousand": 1000,
+        "eight hundred": 800,
+        "five hundred": 500,
+    }
+    for phrase, value in number_words.items():
+        if phrase in normalized:
+            return value
+    return 0
 
 
 def extract_location(text: str) -> str:
@@ -53,6 +91,7 @@ def extract_location(text: str) -> str:
         "Indiranagar",
         "HSR Layout",
         "Whitefield",
+        "Bommanahalli",
         "Koramangala",
         "Electronic City",
     ]
@@ -65,7 +104,7 @@ def extract_location(text: str) -> str:
 
 def extract_timeline(text: str) -> str:
     lowered = text.lower()
-    for phrase in ["tomorrow", "today", "next week", "this week", "next month"]:
+    for phrase in ["tomorrow", "today", "next week", "this week", "next month", "eod"]:
         if phrase in lowered:
             return phrase
     return ""
@@ -73,14 +112,15 @@ def extract_timeline(text: str) -> str:
 
 def extract_dimensions(text: str) -> str:
     match = re.search(
-        r"\b\d+\s*[xX]\s*\d+\s*[xX]\s*\d+(?:\s*(?:inch|in|cm|mm))?\b",
+        r"\b\d+\s*(?:[xX]|by)\s*\d+\s*(?:[xX]|by)\s*\d+(?:\s*(?:inch|in|cm|mm))?\b",
         text,
+        flags=re.IGNORECASE,
     )
     return match.group(0) if match else ""
 
 
 def extract_ply(text: str) -> str:
-    match = re.search(r"\b\d+\s*ply\b", text, flags=re.IGNORECASE)
+    match = re.search(r"\b\d+\s*-?\s*ply\b", text, flags=re.IGNORECASE)
     return match.group(0) if match else ""
 
 
@@ -92,6 +132,28 @@ def extract_material_strength(text: str) -> str:
 def extract_product_weight(text: str) -> str:
     match = re.search(r"\b\d+(?:\.\d+)?\s*(?:kg|kgs|kilogram|grams|gram|g)\b", text, flags=re.IGNORECASE)
     return match.group(0) if match else ""
+
+
+def extract_print_colors(text: str) -> str:
+    match = re.search(r"\b\d+\s*(?:colour|color|colours|colors)\b", text, flags=re.IGNORECASE)
+    return match.group(0) if match else ""
+
+
+def extract_finish_lamination(text: str) -> str:
+    lowered = text.lower()
+    for phrase in ["matte lamination", "gloss lamination", "lamination", "matte", "gloss"]:
+        if phrase in lowered:
+            return phrase
+    return ""
+
+
+def extract_artwork_ready(text: str) -> str:
+    lowered = text.lower()
+    if "artwork ready" in lowered or "design ready" in lowered:
+        return "yes"
+    if "artwork not ready" in lowered or "design not ready" in lowered:
+        return "no"
+    return ""
 
 
 def extract_demo_fields(source: str, message: str, log_path: str = LOG_PATH) -> dict[str, Any]:
@@ -139,7 +201,11 @@ def extract_demo_fields(source: str, message: str, log_path: str = LOG_PATH) -> 
         "ply": extract_ply(message),
         "material_strength": extract_material_strength(message),
         "product_weight": extract_product_weight(message),
+        "print_colors": extract_print_colors(message),
+        "finish_lamination": extract_finish_lamination(message),
+        "artwork_ready": extract_artwork_ready(message),
         "extraction_confidence": "medium",
+        "extraction_mode": "heuristic_fallback",
         "log_path": log_path,
     }
 
@@ -165,6 +231,151 @@ def extract_demo_fields(source: str, message: str, log_path: str = LOG_PATH) -> 
     return fields
 
 
+def extract_fields(source: str, message: str, log_path: str = LOG_PATH) -> dict[str, Any]:
+    """Use Gemini extraction when configured; fall back to deterministic heuristics."""
+    ai_result = extract_fields_with_gemini(source, message, log_path=log_path)
+    if ai_result["ok"]:
+        return ai_result["fields"]
+
+    fields = extract_demo_fields(source, message, log_path=log_path)
+    fields["extraction_mode"] = "heuristic_fallback"
+    fields["extraction_error"] = ai_result["error"]
+    return fields
+
+
+def extract_fields_with_gemini(source: str, message: str, log_path: str = LOG_PATH) -> dict[str, Any]:
+    load_dotenv(override=False)
+    api_key = os.environ.get("GOOGLE_API_KEY", "").strip()
+    if not api_key:
+        return {"ok": False, "fields": {}, "error": "GOOGLE_API_KEY is not set."}
+
+    prompt = _extraction_prompt(source, message)
+    payload = {
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.1,
+            "response_mime_type": "application/json",
+        },
+    }
+    url = (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{GEMINI_TEXT_MODEL}:generateContent?key={api_key}"
+    )
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            response_json = json.loads(response.read().decode("utf-8"))
+        extracted_json = _extract_text(response_json)
+        fields = _normalize_ai_fields(json.loads(extracted_json), source, message, log_path)
+        fields["extraction_mode"] = "gemini_text_extraction"
+        return {"ok": True, "fields": fields, "error": ""}
+    except (urllib.error.URLError, TimeoutError, ValueError, json.JSONDecodeError, KeyError) as exc:
+        return {"ok": False, "fields": {}, "error": str(exc)}
+
+
+def _extract_text(response_json: dict[str, Any]) -> str:
+    candidates = response_json.get("candidates", [])
+    parts = candidates[0].get("content", {}).get("parts", []) if candidates else []
+    return " ".join(part.get("text", "").strip() for part in parts).strip()
+
+
+def _extraction_prompt(source: str, message: str) -> str:
+    return f"""
+Extract a packaging MSME sales lead into strict JSON.
+
+Business: BLRPackworks, a custom corrugated and printed packaging manufacturer.
+Supported product_type values:
+- corrugated_box
+- printed_carton
+- food_packaging
+- ecommerce_shipping
+- industrial_packaging
+- unknown
+
+Rules:
+- Return only JSON. No markdown.
+- Use empty strings for unknown text fields and 0 for unknown quantity.
+- Do not invent specs.
+- Set extraction_confidence to high, medium, or low.
+- For phone calls, add transcript_summary.
+- Preserve the original customer message in message.
+
+JSON keys:
+source, message, product, product_type, quantity, industry, location, timeline,
+dimensions, ply, material_strength, paperboard_gsm, print_colors,
+finish_lamination, artwork_ready, food_grade_requirement, barrier_requirement,
+certification_concern, product_weight, fragility, shipment_volume,
+branding_printing_need, industrial_product_type, handling_storage_requirement,
+budget_range, contact_name, company_name, phone, email, transcript_summary,
+intent, extraction_confidence.
+
+Lead source: {source}
+Customer message:
+{message}
+""".strip()
+
+
+def _normalize_ai_fields(
+    extracted: dict[str, Any],
+    source: str,
+    message: str,
+    log_path: str,
+) -> dict[str, Any]:
+    fallback = extract_demo_fields(source, message, log_path=log_path)
+    text_keys = [
+        "source",
+        "message",
+        "product",
+        "product_type",
+        "industry",
+        "location",
+        "timeline",
+        "dimensions",
+        "ply",
+        "material_strength",
+        "paperboard_gsm",
+        "print_colors",
+        "finish_lamination",
+        "artwork_ready",
+        "food_grade_requirement",
+        "barrier_requirement",
+        "certification_concern",
+        "product_weight",
+        "fragility",
+        "shipment_volume",
+        "branding_printing_need",
+        "industrial_product_type",
+        "handling_storage_requirement",
+        "budget_range",
+        "contact_name",
+        "company_name",
+        "phone",
+        "email",
+        "transcript_summary",
+        "intent",
+        "extraction_confidence",
+    ]
+    fields = fallback.copy()
+    for key in text_keys:
+        value = extracted.get(key)
+        if value is not None:
+            fields[key] = str(value).strip()
+    quantity = extracted.get("quantity", fallback.get("quantity", 0))
+    try:
+        fields["quantity"] = int(quantity)
+    except (TypeError, ValueError):
+        fields["quantity"] = fallback.get("quantity", 0)
+    fields["source"] = fields.get("source") or source
+    fields["message"] = fields.get("message") or message
+    fields["log_path"] = log_path
+    return fields
+
+
 def recent_logs(log_path: str = LOG_PATH, limit: int = 5) -> list[dict[str, Any]]:
     path = Path(log_path)
     if not path.exists():
@@ -176,6 +387,15 @@ def recent_logs(log_path: str = LOG_PATH, limit: int = 5) -> list[dict[str, Any]
         except json.JSONDecodeError:
             continue
     return list(reversed(rows))
+
+
+def qualification_kwargs(extracted: dict[str, Any]) -> dict[str, Any]:
+    """Remove UI/debug extraction metadata before calling the business tool."""
+    return {
+        key: value
+        for key, value in extracted.items()
+        if key not in EXTRACTION_METADATA_KEYS
+    }
 
 
 def stream_process_events(
@@ -219,10 +439,10 @@ def stream_process_events(
             },
         }
 
-    extracted = extract_demo_fields(source, raw_message, log_path=log_path)
+    extracted = extract_fields(source, raw_message, log_path=log_path)
     yield {"event": "extraction", "data": extracted}
 
-    result = qualify_packaging_lead(**extracted)
+    result = qualify_packaging_lead(**qualification_kwargs(extracted))
     yield {
         "event": "validation",
         "data": {

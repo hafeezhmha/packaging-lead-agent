@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from packaging_lead_intake.pipeline import extract_demo_fields
+from packaging_lead_intake.pipeline import extract_demo_fields, qualification_kwargs
 from packaging_lead_intake.tools import qualify_packaging_lead
 
 
@@ -25,7 +25,7 @@ def main() -> None:
 def run_case(case: dict[str, Any]) -> dict[str, Any]:
     started = time.perf_counter()
     extracted = extract_demo_fields(case["source"], case["message"], log_path=EVAL_LOG_PATH)
-    result = qualify_packaging_lead(**extracted)
+    result = qualify_packaging_lead(**qualification_kwargs(extracted))
     latency = time.perf_counter() - started
     task_completed = bool(result["suggested_response"] or result["handoff_summary"])
     voice_case = case.get("input_type") == "voice" or case["source"] == "Phone Transcript"

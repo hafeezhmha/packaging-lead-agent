@@ -307,6 +307,7 @@ def _render_html() -> str:
       if (event.event === "extraction") {{
         const d = event.data;
         document.querySelector("#extraction").innerHTML = kv([
+          ["mode", d.extraction_mode],
           ["source", d.source], ["product type", d.product_type], ["product", d.product],
           ["quantity", d.quantity], ["industry", d.industry], ["location", d.location],
           ["timeline", d.timeline], ["dimensions", d.dimensions], ["confidence", d.extraction_confidence]
