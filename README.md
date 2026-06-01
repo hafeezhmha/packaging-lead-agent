@@ -32,18 +32,16 @@ making unsafe commitments too early.
 
 ## Architecture
 
-```text
-Customer Message / Voice Transcript
-↓
-LLM Extraction
-↓
-Deterministic Validation + Lead Scoring
-↓
-Safe Customer Response
-↓
-Human Handoff Summary
-↓
-Local Lead Log
+```mermaid
+flowchart LR
+    A[Customer inquiry] --> B{Voice?}
+    B -- Yes --> C[STT]
+    B -- No --> D[LLM extraction]
+    C --> D
+    D --> E[Deterministic validation + lead scoring]
+    E --> F[Safe reply]
+    F --> G[Human handoff]
+    G --> H[Lead log]
 ```
 
 The LLM is used for messy language understanding and field extraction.
