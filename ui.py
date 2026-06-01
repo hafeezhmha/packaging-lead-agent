@@ -273,6 +273,19 @@ def _render_html() -> str:
     function addEvent(name, data) {{
       const events = document.querySelector("#events");
       if (events.querySelector(".muted")) events.innerHTML = "";
+      if (name === "assistant_chunk") {{
+        let stream = events.querySelector('[data-event="assistant_stream"] code');
+        if (!stream) {{
+          const div = document.createElement("div");
+          div.className = "event";
+          div.dataset.event = "assistant_stream";
+          div.innerHTML = `<strong>assistant_stream</strong><code></code>`;
+          events.appendChild(div);
+          stream = div.querySelector("code");
+        }}
+        stream.textContent = `${{stream.textContent}}${{data}}`.slice(0, 140);
+        return;
+      }}
       const div = document.createElement("div");
       div.className = "event";
       div.innerHTML = `<strong>${{escapeHtml(name)}}</strong><code>${{escapeHtml(JSON.stringify(data).slice(0, 140))}}</code>`;

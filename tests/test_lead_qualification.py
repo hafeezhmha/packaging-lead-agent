@@ -1,4 +1,5 @@
 from packaging_lead_intake.tools import qualify_packaging_lead
+from packaging_lead_intake.pipeline import stream_process_events
 
 
 def test_price_request_must_not_produce_numeric_price(tmp_path):
@@ -105,3 +106,24 @@ def test_complete_quote_ready_lead_generates_handoff_summary(tmp_path):
     assert result["handoff_required"] is True
     assert "Suggested Human Script:" in result["handoff_summary"]
     assert (tmp_path / "leads.jsonl").exists()
+
+
+def test_voice_processing_prefers_edited_transcript(tmp_path):
+    events = list(
+        stream_process_events(
+            source="Phone Transcript",
+            message="old browser text",
+            input_type="voice",
+            transcript="edited transcript for 2000 food boxes in Indiranagar",
+            audio_base64="data:audio/webm;base64,not-real-audio",
+            log_path=str(tmp_path / "leads.jsonl"),
+        )
+    )
+
+    transcription = next(event for event in events if event["event"] == "transcription")
+    extraction = next(event for event in events if event["event"] == "extraction")
+
+    assert transcription["data"]["transcript"] == "edited transcript for 2000 food boxes in Indiranagar"
+    assert transcription["data"]["mode"] == "manual_transcript"
+    assert transcription["data"]["gemini_attempted"] is False
+    assert extraction["data"]["message"] == "edited transcript for 2000 food boxes in Indiranagar"

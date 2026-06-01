@@ -413,25 +413,37 @@ def stream_process_events(
     yield {"event": "received", "data": {"type": input_type, "source": source, "message": message}}
 
     if input_type == "voice":
-        transcription = transcribe_audio_with_gemini(audio_base64) if audio_base64 else {
-            "ok": False,
-            "transcript": "",
-            "mode": "fallback_no_audio",
-            "error": "No audio payload was provided.",
-        }
-        if transcription["ok"]:
-            raw_message = transcription["transcript"]
+        if transcript:
+            transcription = {
+                "ok": True,
+                "transcript": transcript,
+                "mode": "manual_transcript",
+                "error": "",
+            }
+            raw_message = transcript
         else:
-            raw_message = transcript or message
+            transcription = transcribe_audio_with_gemini(audio_base64) if audio_base64 else {
+                "ok": False,
+                "transcript": "",
+                "mode": "fallback_no_audio",
+                "error": "No audio payload was provided.",
+            }
+            if transcription["ok"]:
+                raw_message = transcription["transcript"]
+            else:
+                raw_message = message
         yield {
             "event": "transcription",
             "data": {
                 "transcript": raw_message,
                 "audio_bytes": audio_bytes,
                 "mode": transcription["mode"] if transcription["ok"] else "browser_speech_recognition_or_manual_fallback",
-                "gemini_attempted": bool(audio_base64),
+                "gemini_attempted": bool(audio_base64 and not transcript),
                 "gemini_error": "" if transcription["ok"] else transcription.get("error", ""),
                 "note": (
+                    "Using the edited/manual transcript supplied from the UI."
+                    if transcript
+                    else
                     "Gemini transcribed the uploaded browser microphone audio."
                     if transcription["ok"]
                     else "Gemini transcription was unavailable or failed, so the browser/manual transcript is used."
