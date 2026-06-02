@@ -15,6 +15,8 @@ def test_price_request_must_not_produce_numeric_price(tmp_path):
     assert result["handoff_trigger"] == "price_request"
     assert "1000" not in result["suggested_response"]
     assert "Pricing depends" in result["suggested_response"]
+    assert "Before I pass this to sales" in result["suggested_response"]
+    assert result["conversation_stage"] == "needs_clarification"
 
 
 def test_urgent_delivery_request_triggers_handoff(tmp_path):
@@ -127,3 +129,32 @@ def test_voice_processing_prefers_edited_transcript(tmp_path):
     assert transcription["data"]["mode"] == "manual_transcript"
     assert transcription["data"]["gemini_attempted"] is False
     assert extraction["data"]["message"] == "edited transcript for 2000 food boxes in Indiranagar"
+
+
+def test_stream_emits_conversation_check_before_handoff(tmp_path):
+    events = list(
+        stream_process_events(
+            source="Justdial",
+            message="What is the price for 1000 boxes? I need them tomorrow.",
+            log_path=str(tmp_path / "leads.jsonl"),
+        )
+    )
+    names = [event["event"] for event in events]
+    conversation = next(event for event in events if event["event"] == "conversation_check")
+
+    assert names.index("conversation_check") < names.index("handoff")
+    assert conversation["data"]["stage"] == "needs_clarification"
+    assert conversation["data"]["clarifying_questions"]
+
+
+def test_stream_allows_disabled_log_path():
+    events = list(
+        stream_process_events(
+            source="WhatsApp",
+            message="Do you make boxes for online shipping?",
+            log_path="",
+        )
+    )
+
+    lead_log = next(event for event in events if event["event"] == "lead_log")
+    assert lead_log["data"]["recent"] == []

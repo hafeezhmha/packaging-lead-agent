@@ -128,6 +128,9 @@ def _render_html() -> str:
     .safety {{ background:#fffaf0; border-color:#f2c94c; }}
     .reply {{ font-size:17px; line-height:1.55; margin:0; }}
     .reply:empty::before {{ content:"Assistant reply will stream here."; color:var(--muted); }}
+    .conversation {{ display:grid; gap:10px; }}
+    .chat-turn {{ border:1px solid #e4eaf2; border-radius:8px; padding:10px; background:#fbfdff; }}
+    .chat-turn strong {{ display:block; margin-bottom:5px; color:#175cd3; }}
     .log-item {{ border-top:1px solid #edf0f2; padding:10px 0; }}
     .log-item:first-child {{ border-top:0; }}
     code {{ background:#eef2f6; border-radius:4px; padding:2px 5px; }}
@@ -179,6 +182,9 @@ def _render_html() -> str:
           <button id="recordVoice" class="secondary">Record Voice</button>
           <button id="stopVoice" class="danger" disabled>Stop Recording</button>
         </div>
+        <label>Customer clarification</label>
+        <textarea id="clarification" placeholder="Add the client's answer to the AI questions, then continue qualification."></textarea>
+        <button id="continueQualification" class="secondary">Continue Qualification</button>
         <div class="mode-note">
           <p class="muted" id="voiceStatus">Voice mode records microphone audio and sends it to the backend for Gemini transcription when GOOGLE_API_KEY is configured. Browser speech recognition/manual transcript edit is the fallback.</p>
           <label style="display:flex;gap:8px;align-items:center;font-weight:500;margin:8px 0 0;">
@@ -218,6 +224,11 @@ def _render_html() -> str:
         <h2>Safety</h2>
         <p>No price quote. No delivery promise. No inventory, discount, or final quotation commitment. Risky cases go to a human.</p>
       </div>
+    </section>
+
+    <section class="card">
+      <h2>AI Qualification Conversation</h2>
+      <div class="conversation" id="conversation"><p class="muted">AI/client clarification flow will appear here before human handoff.</p></div>
     </section>
 
     <section class="card">
@@ -296,6 +307,7 @@ def _render_html() -> str:
       document.querySelector("#extraction").innerHTML = "<p class='muted'>Waiting for extraction event.</p>";
       document.querySelector("#validation").innerHTML = "<p class='muted'>Waiting for validation event.</p>";
       document.querySelector("#score").innerHTML = "<p class='muted'>Waiting for lead score event.</p>";
+      document.querySelector("#conversation").innerHTML = "<p class='muted'>AI/client clarification flow will appear here before human handoff.</p>";
       document.querySelector("#reply").textContent = "";
       replyForSpeech = "";
       document.querySelector("#handoff").textContent = "No handoff yet.";
@@ -329,10 +341,22 @@ def _render_html() -> str:
       if (event.event === "validation") {{
         document.querySelector("#validation").innerHTML = `<h3>Missing Details</h3>${{list(event.data.missing_fields)}}<h3>Next Questions</h3>${{list(event.data.next_questions)}}<h3>Safety Flags</h3><pre>${{escapeHtml(JSON.stringify(event.data.safety_flags, null, 2))}}</pre>`;
       }}
+      if (event.event === "conversation_check") {{
+        const questions = event.data.clarifying_questions || [];
+        const stageLabel = event.data.stage === "needs_clarification"
+          ? "AI should ask the client before handoff"
+          : "No more AI clarification needed before handoff";
+        document.querySelector("#conversation").innerHTML = `
+          <div class="chat-turn"><strong>AI Check</strong><span>${{escapeHtml(stageLabel)}}</span></div>
+          <div class="chat-turn"><strong>AI to Client</strong>${{list(questions)}}</div>
+          <div class="chat-turn"><strong>Next Step</strong><span>${{questions.length ? "Wait for the client answer, then continue qualification." : "Prepare the human handoff summary."}}</span></div>
+        `;
+      }}
       if (event.event === "lead_score") {{
         const d = event.data;
         document.querySelector("#score").innerHTML = `<div class="score ${{escapeHtml(d.lead_status)}}">${{escapeHtml(d.lead_status)}}</div>` + kv([
           ["handoff required", d.handoff_required ? "yes" : "no"], ["handoff trigger", d.handoff_trigger],
+          ["conversation stage", d.conversation_stage],
           ["confidence", d.extraction_confidence], ["latency", `${{d.latency_seconds}}s`]
         ]);
         document.querySelector("#statusScore").textContent = d.lead_status || "-";
@@ -358,6 +382,18 @@ def _render_html() -> str:
     document.querySelector("#processText").onclick = () => send({{
       type: "text", source: document.querySelector("#source").value, message: document.querySelector("#message").value
     }});
+    document.querySelector("#continueQualification").onclick = () => {{
+      const source = document.querySelector("#source").value;
+      const transcript = document.querySelector("#transcript").value.trim();
+      const original = source === "Phone Transcript" && transcript ? transcript : document.querySelector("#message").value.trim();
+      const clarification = document.querySelector("#clarification").value.trim();
+      if (!clarification) return;
+      send({{
+        type: "text",
+        source,
+        message: `${{original}}\nCustomer clarification: ${{clarification}}`
+      }});
+    }};
     document.querySelector("#processVoice").onclick = () => send({{
       type: "voice", source: "Phone Transcript", message: document.querySelector("#message").value,
       transcript: document.querySelector("#transcript").value, audio_base64: window.lastAudioBase64 || ""
@@ -370,6 +406,7 @@ def _render_html() -> str:
         document.querySelector("#source").value = data.source;
         document.querySelector("#message").value = data.message;
         document.querySelector("#transcript").value = data.source === "Phone Transcript" ? data.message : "";
+        document.querySelector("#clarification").value = "";
       }};
       document.querySelector("#samples").appendChild(btn);
     }});

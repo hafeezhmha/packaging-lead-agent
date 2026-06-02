@@ -273,13 +273,25 @@ def _suggested_response(
     if unsupported:
         return BUSINESS_CONFIG["response_templates"]["unsupported_request"]
 
+    next_questions = _next_best_questions(lead["product_type"], missing_fields)
     if price_request:
+        if next_questions:
+            fields = ", ".join(next_questions)
+            return (
+                f"{BUSINESS_CONFIG['response_templates']['price_request']} "
+                f"Before I pass this to sales, please share {fields}."
+            )
         return BUSINESS_CONFIG["response_templates"]["price_request"]
 
     if commitment_request:
+        if next_questions:
+            fields = ", ".join(next_questions)
+            return (
+                f"{BUSINESS_CONFIG['response_templates']['commitment_request']} "
+                f"Before I pass this to sales, please share {fields}."
+            )
         return BUSINESS_CONFIG["response_templates"]["commitment_request"]
 
-    next_questions = _next_best_questions(lead["product_type"], missing_fields)
     if next_questions:
         fields = ", ".join(next_questions)
         product = lead.get("product") or lead["product_type"].replace("_", " ")
@@ -591,6 +603,14 @@ def qualify_packaging_lead(
     handoff_summary = (
         _handoff_summary(lead, status, missing, trigger, notes) if handoff else ""
     )
+    next_questions = _next_best_questions(product_type_value, missing)
+    conversation_stage = "needs_clarification" if next_questions else "ready_for_handoff"
+    if status == "Spam":
+        conversation_stage = "closed"
+    elif unsupported:
+        conversation_stage = "human_review"
+    elif not handoff and not next_questions:
+        conversation_stage = "qualified_without_handoff"
 
     result = {
         "company": {
@@ -601,7 +621,9 @@ def qualify_packaging_lead(
         "lead": lead,
         "source": source,
         "missing_fields": missing,
-        "next_questions": _next_best_questions(product_type_value, missing),
+        "next_questions": next_questions,
+        "clarifying_questions": next_questions,
+        "conversation_stage": conversation_stage,
         "lead_status": status,
         "extraction_confidence": confidence_value,
         "urgency": "high" if urgent else "normal",

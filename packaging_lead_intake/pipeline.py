@@ -377,8 +377,10 @@ def _normalize_ai_fields(
 
 
 def recent_logs(log_path: str = LOG_PATH, limit: int = 5) -> list[dict[str, Any]]:
+    if not log_path:
+        return []
     path = Path(log_path)
-    if not path.exists():
+    if not path.exists() or not path.is_file():
         return []
     rows = []
     for line in path.read_text(encoding="utf-8").splitlines()[-limit:]:
@@ -464,12 +466,21 @@ def stream_process_events(
         },
     }
     yield {
+        "event": "conversation_check",
+        "data": {
+            "stage": result["conversation_stage"],
+            "clarifying_questions": result["clarifying_questions"],
+            "handoff_trigger": result["handoff_trigger"],
+        },
+    }
+    yield {
         "event": "lead_score",
         "data": {
             "lead_status": result["lead_status"],
             "extraction_confidence": result["extraction_confidence"],
             "handoff_required": result["handoff_required"],
             "handoff_trigger": result["handoff_trigger"],
+            "conversation_stage": result["conversation_stage"],
             "latency_seconds": round(time.perf_counter() - started, 4),
         },
     }
