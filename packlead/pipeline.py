@@ -288,7 +288,7 @@ def _extraction_prompt(source: str, message: str) -> str:
     return f"""
 Extract a packaging MSME sales lead into strict JSON.
 
-Business: BLRPackworks, a custom corrugated and printed packaging manufacturer.
+Business: PackLead, a custom corrugated and printed packaging manufacturer.
 Supported product_type values:
 - corrugated_box
 - printed_carton

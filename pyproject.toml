@@ -1,7 +1,7 @@
 [project]
-name = "packaging-lead-intake"
+name = "packlead"
 version = "0.1.0"
-description = "Google ADK prototype for packaging MSME lead intake and qualification."
+description = "Google ADK-based packaging MSME lead intake and qualification assistant."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

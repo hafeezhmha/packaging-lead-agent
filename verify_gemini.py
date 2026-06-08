@@ -20,7 +20,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from packaging_lead_intake.stt import transcribe_audio_with_gemini
+from packlead.stt import transcribe_audio_with_gemini
 
 
 TEXT_MODEL = os.environ.get("GEMINI_TEXT_MODEL", "gemini-2.5-flash")
@@ -59,7 +59,7 @@ def verify_text_call(api_key: str) -> bool:
                 "parts": [
                     {
                         "text": (
-                            "Reply with exactly: BLRPackworks Gemini text check OK"
+                            "Reply with exactly: PackLead Gemini text check OK"
                         )
                     }
                 ],

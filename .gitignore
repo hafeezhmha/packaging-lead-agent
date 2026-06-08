@@ -3,7 +3,8 @@
 .adk/
 **/__pycache__/
 .pytest_cache/
-packaging_lead_intake/.adk/
+packlead/.adk/
 lead_log.jsonl
 eval/*.jsonl
 prepare.md
+data/

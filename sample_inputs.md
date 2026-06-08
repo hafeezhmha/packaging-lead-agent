@@ -1,6 +1,6 @@
 # Sample Inputs
 
-Use these in `adk run packaging_lead_intake` or `adk web` after configuring
+Use these in `adk run packlead` or `adk web` after configuring
 credentials.
 
 ## 1. Hot IndiaMART Printed Carton Lead

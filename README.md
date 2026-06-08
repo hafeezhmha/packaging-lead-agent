@@ -1,7 +1,7 @@
-# BLRPackworks Lead Intake Assistant
+# PackLead
 
-This is a small Google ADK prototype. It
-models BLRPackworks, a Peenya-based custom corrugated and printed packaging
+A Google ADK-based lead intake and qualification assistant for
+BLRPackworks, a Peenya-based custom corrugated and printed packaging
 manufacturer serving D2C brands, e-commerce sellers, food brands, and
 industrial customers.
 
@@ -126,7 +126,7 @@ This is intentionally not a CRM. Each record includes:
 
 ## Configurability
 
-BLRPackworks is configured in:
+The business is configured in:
 
 ```text
 config/business_config.json
@@ -156,8 +156,8 @@ config/similar_msme_config_example.json
 ## Project Structure
 
 ```text
-packaging-lead-intake/
-  packaging_lead_intake/
+packlead/
+  packlead/
     __init__.py
     agent.py
     config_loader.py
@@ -248,18 +248,18 @@ Voice flow:
 - Optional browser TTS can read the assistant reply aloud when the `Read
   assistant reply aloud` checkbox is enabled.
 
-For local demo purposes, `ui.py` attempts Gemini text extraction when
+For local development, `ui.py` attempts Gemini text extraction when
 `GOOGLE_API_KEY` is configured. If Gemini is unavailable, it falls back to
-lightweight extraction heuristics so the demo can still run without credentials.
+lightweight extraction heuristics so the local flow can still run without credentials.
 In both paths, deterministic code handles scoring, missing fields, safety, and
 handoff.
 
 Current AI/STT/TTS status:
 
 - WebSocket UI extraction: Gemini text extraction when `GOOGLE_API_KEY` is
-  configured, with stable demo heuristics in `packaging_lead_intake/pipeline.py`
+  configured, with stable demo heuristics in `packlead/pipeline.py`
   as fallback.
-- ADK/Gemini extraction: supported separately through `packaging_lead_intake/agent.py`
+- ADK/Gemini extraction: supported separately through `packlead/agent.py`
   when API credentials are configured.
 - WebSocket UI and ADK agent are separate entry points, but both use Gemini for
   messy language understanding when configured and both use the same
@@ -296,7 +296,7 @@ cp .env.sample .env
 Fill in either `GOOGLE_API_KEY` or Vertex AI settings in `.env`, then run:
 
 ```bash
-uv run adk run packaging_lead_intake
+uv run adk run packlead
 ```
 
 For Gemini API key mode, `.env` should include:
@@ -331,28 +331,28 @@ Or use the ADK web UI:
 uv run adk web
 ```
 
-Then select `packaging_lead_intake`.
+Then select `packlead`.
 
 ## ADK Base Pattern
 
-The prototype uses the Python `customer-service` sample as the conceptual base:
+The assistant follows the Python `customer-service` sample's conceptual base:
 a single customer-facing root agent with function tools and safety constraints.
-The project structure is kept closer to the simpler `fun-facts` sample to avoid
+The project structure stays closer to the simpler `fun-facts` sample to avoid
 unnecessary CRM, cart, live video, and multimodal complexity.
 
 ## Current Limitations
 
-- Text and voice-demo input are supported locally; there is no real phone-call integration.
+- Text and local voice input are supported; there is no real phone-call integration.
 - No real WhatsApp, IndiaMART, Justdial, website, or phone integration.
 - No pricing engine.
 - No delivery feasibility or inventory lookup.
 - No CRM or database beyond the local JSONL lead log.
 - The local WebSocket UI uses Gemini text extraction when configured and falls
   back to heuristics if the API is unavailable.
-- The local UI is a demo surface, not a SaaS dashboard or CRM.
+- The local UI is an operator surface for testing the intake flow, not a SaaS dashboard or CRM.
 - Voice capture is real browser microphone capture. The backend can use Gemini
   audio transcription with `GOOGLE_API_KEY`; browser speech recognition/manual
   transcript edit remains the fallback.
 - TTS is browser Web Speech Synthesis only, not production TTS.
-- This is still demo voice flow, not production call-center infrastructure.
-- The ADK agent remains a separate entry point for an agent-console demo.
+- Voice support is local browser capture plus server-side transcription, not production call-center infrastructure.
+- The ADK agent remains a separate entry point for the ADK console.

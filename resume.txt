@@ -1,0 +1,73 @@
+Mohammed Hafeez Ahmed Email: hafeezhmha.dev@gmail.com
+Portfolio: hafeezhmha.vercel.app Mobile: +91-8095150412
+Github: github.com/hafeezhmha Bangalore, India
+LinkedIn: linkedin.com/in/hafeezhmha
+Professional Summary
+AI/ML Engineer specializing in production computer vision, deep learning and agentic AI systems. Experienced in building
+end-to-end AI workflows that transform visual and document data into deployable, reliable products. Strong ownership across
+model benchmarking, inference optimization, LLM integration, deployment, and production AI pipelines for real-world
+applications.
+Technical Skills
+• Languages: Python, JavaScript, Rust
+• AI/ML: PyTorch, Transformers, ONNX Runtime, Scikit-learn
+• Computer Vision: OpenCV, Object Detection (YOLO, RT-DETR), Segmentation, OCR, SAM2
+• Agentic AI: LangChain, Google ADK, DeepAgents, A2A Framework, OpenAI SDK, Claude SDK, Vector Databases (Pinecone,
+Qdrant, Chroma), Neo4j, GraphRAG
+• Deployment & Infrastructure: Docker, AWS Lambda, S3, API Gateway, CI/CD, GitHub Actions, Replicate/Cog, Flask,
+Streamlit
+Experience
+TheHouseKraft Bangalore, India
+Machine Learning Engineer (Full-time) Dec 2024 - Present
+• Computer Vision Detection Pipeline: Built floor-plan object detection pipeline achieving 70%+ mAP on 5,000+
+annotated images using YOLO and RT-DETR models.
+• Architectural AI Validation: Designed post-processing and validation workflows to improve accuracy and consistency of
+AI-generated architectural outputs for downstream 3D systems.
+• Cut-List Optimization: Redesigned production cut-list optimizer using a parameterized time-constrained algorithm, reducing
+execution time from 2+ minutes to 1–5 seconds while maintaining <5% material wastage.
+• Asynchronous Optimization Workflow: Built asynchronous optimization workflow with webhook-based result delivery,
+improving reliability and responsiveness for large AWS Lambda workloads.
+• RAG Chatbot Reliability: Improved internal RAG chatbot reliability by redesigning chunking/retrieval workflows,
+implementing guardrails, and resolving FAISS retrieval issues with Gemini models.
+• GenAI Rendering Workflows: Integrated GenAI rendering workflows enabling style-based interior generation from 3D house
+models.
+• 3D Reconstruction: Automated LiDAR point-cloud processing for 3D building reconstruction; implemented density-based
+column detection and exported IFC outputs for architectural workflows.
+• Model Iteration & Deployment: Improved model accuracy through iterative dataset/version updates and managed
+containerized deployment workflows using Replicate/Cog.
+Deduce Technologies Bangalore, India
+AI Developer (Full-time) May 2024 - Dec 2024
+• Agentic Automation: Built an AI Assisted automated POI extraction pipeline for geospatial imagery using OCR and
+OpenCV workflows; optimized text-detection models with ONNX Runtime achieving 1.2s CPU inference/image and
+processing 720+ images/hour.
+• Model Benchmarking: Benchmarked 6+ OCR engines and cloud APIs including PaddleOCR, EasyOCR, and Tesseract
+across accuracy-speed tradeoffs for production geospatial workflows.
+• Multimodal Extraction Pipeline: Architected multimodal extraction pipeline combining OCR, NER models, and
+LLaMA-70B for structured data extraction from shop signage and building imagery.
+• Annotation Tooling: Built web-based annotation tooling to accelerate labeling and review workflows for computer vision and
+NLP datasets.
+• Multilingual Vision Systems: Integrated Indic language models for Hindi, Kannada, and Tamil transliteration, enabling
+multilingual POI extraction from noisy real-world imagery.
+Open Source
+• Replicate Cog: Contributed to Replicate’s Cog ML containerization framework by refactoring FastAPI lifecycle handling to
+modern async lifespan workflows, preventing future Starlette compatibility issues.
+• Meta VideoSeal: Contributed to Facebook Research’s video watermarking library by fixing package installation issues through
+migration of hardcoded paths to relative imports.
+• OpenEvolve: Added iteration tracking to open-source AlphaEvolve workflows, improving visibility into evolutionary
+optimization convergence.
+Projects
+• Nestor AI: Built agentic research backend for source-grounded web investigation using FastAPI, Claude Agent SDK,
+FastMCP, Valkey-compatible streams, and WebSockets; implemented asynchronous agent sessions, MCP websearch/browse
+tools, per-session workspace hydration, source-card enrichment from HTML snapshots, abort handling, and Claude session
+log persistence/restoration for follow-up turns.
+• BLRPackworks Lead Intake Assistant: Built Google ADK-based agentic lead qualification system for packaging MSMEs using
+Gemini extraction, deterministic scoring, safety guardrails, product-specific follow-up logic, human handoff summaries,
+WebSocket text/voice UI, Gemini transcription support, JSONL lead logging, and evaluation metrics for qualification quality.
+• CardSense AI: Built agentic RAG system for credit-card Q&A using LangChain, Neo4j, and Pinecone with query-routing
+workflows across graph and vector retrieval pipelines.
+• Goodminton: Built serverless Telegram bot for badminton court booking using LLaMA-70B, Playo APIs, and geospatial
+filtering workflows; deployed on Vercel.
+Education
+K.N.S. Institute of Technology Bangalore, India
+Bachelor of Engineering - Mechanical Engineering 2022
+100x Engineers Remote
+Applied GenAI Mastery Cohort Jan 2024 - July 2024

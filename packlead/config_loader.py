@@ -1,4 +1,4 @@
-"""Business configuration loading for the BLRPackworks demo."""
+"""Business configuration loading for PackLead."""
 
 from __future__ import annotations
 

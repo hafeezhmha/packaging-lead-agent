@@ -1,4 +1,4 @@
-"""Local deterministic demo for the BLRPackworks lead intake tool.
+"""Local deterministic demo for the PackLead tool.
 
 This script does not call an LLM. It shows the rule-based layer that the ADK
 agent uses after the model extracts fields from a customer message.
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 
-from packaging_lead_intake.tools import qualify_packaging_lead
+from packlead.tools import qualify_packaging_lead
 
 
 DEMO_CASES = [

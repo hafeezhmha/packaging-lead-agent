@@ -49,7 +49,7 @@ Deterministic decision:
 
 Assistant reply:
 
-> BLRPackworks can help with custom printed cartons. This sounds urgent, so I will pass it to sales for quick confirmation. Please share dimensions, paperboard/GSM, number of print colors, finish/lamination.
+> PackLead can help with custom printed cartons. This sounds urgent, so I will pass it to sales for quick confirmation. Please share dimensions, paperboard/GSM, number of print colors, finish/lamination.
 
 Handoff summary:
 
@@ -87,7 +87,7 @@ Suggested Human Action:
 Call customer within 30 minutes to collect dimensions, paperboard/GSM, number of print colors, finish/lamination.
 
 Suggested Human Script:
-Hi, this is from BLRPackworks. I saw your requirement for 5000 custom printed cartons for skincare in Bangalore. To prepare an accurate quote, could you confirm dimensions, paperboard/GSM, number of print colors, finish/lamination?
+Hi, this is from PackLead. I saw your requirement for 5000 custom printed cartons for skincare in Bangalore. To prepare an accurate quote, could you confirm dimensions, paperboard/GSM, number of print colors, finish/lamination?
 ```
 
 ## Flow 2: Vague WhatsApp Lead
@@ -123,7 +123,7 @@ Missing details:
 
 Assistant follow-up:
 
-> Yes, BLRPackworks can help with corrugated boxes for e-commerce shipping. Please share product weight, fragility, approximate shipment volume, branding/printing need.
+> Yes, PackLead can help with corrugated boxes for e-commerce shipping. Please share product weight, fragility, approximate shipment volume, branding/printing need.
 
 ## Flow 3: Urgent Price Request
 

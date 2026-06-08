@@ -1,4 +1,4 @@
-"""Speech-to-text helpers for the BLRPackworks voice demo."""
+"""Speech-to-text helpers for the PackLead voice demo."""
 
 from __future__ import annotations
 

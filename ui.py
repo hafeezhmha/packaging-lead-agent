@@ -1,4 +1,4 @@
-"""FastAPI WebSocket demo UI for BLRPackworks lead intake."""
+"""FastAPI WebSocket demo UI for PackLead."""
 
 from __future__ import annotations
 
@@ -12,13 +12,13 @@ import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
-from packaging_lead_intake.config_loader import load_business_config
-from packaging_lead_intake.pipeline import EXAMPLES, SOURCES, recent_logs, stream_process_events
+from packlead.config_loader import load_business_config
+from packlead.pipeline import EXAMPLES, SOURCES, recent_logs, stream_process_events
 
 
 HOST = "127.0.0.1"
 PORT = 8765
-app = FastAPI(title="BLRPackworks Lead Intake Demo")
+app = FastAPI(title="PackLead Demo")
 
 
 @app.get("/")
@@ -78,7 +78,7 @@ def _render_html() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BLRPackworks WebSocket Lead Intake Demo</title>
+  <title>PackLead WebSocket Demo</title>
   <style>
     :root {{ --border:#d8dee4; --bg:#f6f8fa; --panel:#ffffff; --text:#1f2328; --muted:#667085; --blue:#0969da; --blue-soft:#eef6ff; --ok:#067647; --ok-soft:#ecfdf3; --warn:#b54708; --warn-soft:#fff7ed; --bad:#b42318; --bad-soft:#fef3f2; --shadow:0 1px 2px rgba(16,24,40,.06); }}
     * {{ box-sizing:border-box; }}
@@ -147,7 +147,7 @@ def _render_html() -> str:
     <div class="header-row">
       <div class="header-copy">
         <p class="eyebrow">MSME packaging lead intake</p>
-        <h1>BLRPackworks Lead Intake Demo</h1>
+        <h1>PackLead Demo</h1>
         <p class="muted">{business["description"]}</p>
       </div>
       <div class="header-badges">

@@ -1,4 +1,4 @@
-# BLRPackworks AI Lead Intake Playbook
+# PackLead Playbook
 
 ## 1. Business Problem
 
@@ -12,7 +12,7 @@ and qualification.
 
 ## 2. Chosen MSME Segment
 
-The demo focuses on one MSME segment only: custom packaging / manufacturing.
+The assistant focuses on one MSME segment only: custom packaging / manufacturing.
 
 BLRPackworks is a Peenya-based custom corrugated and printed packaging
 manufacturer serving D2C brands, e-commerce sellers, food brands, and industrial
@@ -63,7 +63,7 @@ step by step.
 - Natural customer-facing replies.
 
 In the local UI, extraction uses Gemini when `GOOGLE_API_KEY` is configured. If
-Gemini is unavailable, it falls back to stable demo heuristics so the demo still
+Gemini is unavailable, it falls back to stable local heuristics so the flow still
 runs. In both paths, the extracted fields go through the same deterministic
 qualification tool.
 
@@ -143,7 +143,7 @@ Outgoing event sequence:
 
 The UI has a real microphone record button.
 
-Current prototype flow:
+Current voice flow:
 
 ```text
 Mic button
@@ -163,20 +163,20 @@ Events stream back to UI
 
 If `GOOGLE_API_KEY` is missing or Gemini transcription fails, the UI still
 records audio and uses browser speech recognition/manual transcript edit as the
-fallback. This is a prototype voice flow, not call-center-grade speech-to-text
+fallback. This is a local voice flow, not call-center-grade speech-to-text
 infrastructure.
 
-Optional TTS is also demo-only. When enabled in the UI, the assistant reply is
+Optional TTS is browser-based. When enabled in the UI, the assistant reply is
 read aloud using the browser Web Speech Synthesis API. There is no production
-TTS provider in this prototype.
+TTS provider in this implementation.
 
 Current AI/STT/TTS status:
 
 - WebSocket UI extraction uses Gemini text extraction when `GOOGLE_API_KEY` is
-  configured, with stable demo heuristics in `packaging_lead_intake/pipeline.py`
+  configured, with stable demo heuristics in `packlead/pipeline.py`
   as fallback.
 - ADK/Gemini extraction is available separately through
-  `packaging_lead_intake/agent.py` with Gemini API key or Vertex AI credentials.
+  `packlead/agent.py` with Gemini API key or Vertex AI credentials.
 - The WebSocket UI and ADK agent are separate entry points, but both use Gemini
   for messy language understanding when configured and share deterministic
   qualification logic after extraction.
@@ -186,7 +186,7 @@ Current AI/STT/TTS status:
 - A single `GOOGLE_API_KEY` from `.env` is used server-side for both ADK/Gemini
   agent calls and Gemini audio transcription. The key is never exposed to
   frontend JavaScript.
-- Production STT/TTS would use Gemini audio, Google Speech-to-Text, Deepgram,
+- Production STT/TTS could use Gemini audio, Google Speech-to-Text, Deepgram,
   Whisper, or a similar provider.
 
 To verify the key before demo:
@@ -200,7 +200,7 @@ same `GOOGLE_API_KEY`.
 
 ## 12. Configuring For Similar MSMEs
 
-BLRPackworks is defined in:
+The business is defined in:
 
 ```text
 config/business_config.json
@@ -252,7 +252,7 @@ config.
 ## 15. Add Handoff Rules
 
 Add the trigger name to `handoff_triggers` in config and implement the condition
-in `packaging_lead_intake/tools.py`. The trigger should correspond to a real
+in `packlead/tools.py`. The trigger should correspond to a real
 business risk, not a generic automation idea.
 
 ## 16. Run The Demo
@@ -314,12 +314,12 @@ safety behavior, but it is not a claim of real-world LLM or STT performance.
 - No pricing engine.
 - No delivery feasibility or inventory check.
 - No CRM beyond JSONL lead log.
-- Local UI extraction is deterministic/demo extraction, not the live ADK LLM
-  extraction path.
+- Local UI extraction uses Gemini when configured, with deterministic fallback
+  heuristics; the ADK agent is available as a separate console entry point.
 
 ## 20. Production Next Steps
 
-- Replace demo extraction with the ADK/LLM extraction path in the WebSocket backend.
+- Route the WebSocket backend directly through the ADK agent runtime.
 - Add real STT provider for voice.
 - Add CRM or lead database.
 - Add authenticated sales dashboard.

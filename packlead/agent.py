@@ -1,4 +1,4 @@
-"""Root ADK agent for the BLRPackworks lead intake prototype."""
+"""Root ADK agent for PackLead."""
 
 from dotenv import load_dotenv
 from google.adk.agents import Agent
@@ -72,7 +72,7 @@ Safety rules:
   final confirmation, say that sales must confirm it.
 - If the tool says handoff is required, include the handoff summary after the
   customer-facing response.
-- Never treat a customer budget as an approved BLRPackworks price.
+- Never treat a customer budget as an approved price.
 
 Response style:
 - Be direct and businesslike.
@@ -85,9 +85,9 @@ Response style:
 
 
 root_agent = Agent(
-    name="packaging_lead_intake",
+    name="packlead",
     model="gemini-2.5-flash",
-    description="Lead intake and qualification assistant for BLRPackworks.",
+    description="Lead intake and qualification assistant for packaging MSMEs.",
     instruction=INSTRUCTION,
     tools=[qualify_packaging_lead],
 )

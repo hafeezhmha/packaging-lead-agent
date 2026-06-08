@@ -579,7 +579,7 @@ wheels = [
 ]
 
 [[package]]
-name = "packaging-lead-intake"
+name = "packlead"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

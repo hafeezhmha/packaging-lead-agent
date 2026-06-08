@@ -1,5 +1,5 @@
-from packaging_lead_intake.tools import qualify_packaging_lead
-from packaging_lead_intake.pipeline import stream_process_events
+from packlead.tools import qualify_packaging_lead
+from packlead.pipeline import stream_process_events
 
 
 def test_price_request_must_not_produce_numeric_price(tmp_path):

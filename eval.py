@@ -1,4 +1,4 @@
-"""Evaluation runner for BLRPackworks lead-intake prototype."""
+"""Evaluation runner for PackLead."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from packaging_lead_intake.pipeline import extract_demo_fields, qualification_kwargs
-from packaging_lead_intake.tools import qualify_packaging_lead
+from packlead.pipeline import extract_demo_fields, qualification_kwargs
+from packlead.tools import qualify_packaging_lead
 
 
 TEST_CASES_PATH = Path("eval/test_cases.json")
